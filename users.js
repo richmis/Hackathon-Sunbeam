@@ -27,6 +27,24 @@ router.post('/register', async (req, res) => {
     }
 })
 
+router.post('/login', (req, res) => {
+    const { email, password } = req.body
+    const sql = `SELECT * FROM users WHERE email = ?`
+    pool.query(sql, [email], async (error, data) => {
+        if (data != '') {
+            const dbUser = data[0]
+            const userValid = await bcrypt.compare(password, dbUser.password)
+            if (userValid) 
+                res.send(result.createResult(error, user))
+            else
+                res.send(result.createResult('Invalid Password'))
+        }
+        else
+            res.send(result.createResult('Invalid Email'))
+    })
+})
+
+
 router.put('/profile', (req, res) => {
     const {id, first_name,last_name, email, mobile, birth} = req.body
     const sql = `UPDATE users SET first_name='${first_name}',last_name='${last_name}', email='${email}', mobile = '${mobile}' , birth='${birth}' WHERE id = ${id}`
